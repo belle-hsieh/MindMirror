@@ -141,7 +141,6 @@
   transform: translate(-50%, -50%) scale(1.2);
 }
 
-/* Add container styles for horizontal layout */
 .feature-container {
   display: flex;
   gap: 1.5rem;
@@ -150,7 +149,6 @@
   padding: 0 1rem;
 }
 
-/* Add centered content styles */
 .centered-content {
   display: flex;
   flex-direction: column;

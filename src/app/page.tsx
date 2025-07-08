@@ -1,4 +1,4 @@
-import CornerImage from '../components/ui/CornerImage';
+import CornerImage from '../components/CornerImage';
 
 export default function Home() {
   return (
