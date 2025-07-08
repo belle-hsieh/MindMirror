@@ -41,7 +41,7 @@ export default function Home() {
           <a href="/journal" className="feature-card">
             <div className="feature-emoji">📝</div>
             <h2 className="text-xl font-bold mb-2">Journal</h2>
-            <p className="text-gray-600">Track your thoughts and daily experiences</p>
+            <p className="text-gray-600">Track your thoughts & daily experiences</p>
           </a>
 
           {/* Mood Card */}
@@ -55,7 +55,7 @@ export default function Home() {
           <a href="/chatbot" className="feature-card">
             <div className="feature-emoji">🤖</div>
             <h2 className="text-xl font-bold mb-2">Chatbot</h2>
-            <p className="text-gray-600">Converse with your wellness companion</p>
+            <p className="text-gray-600">Explore journal prompts & wellness exercises</p>
           </a>
         </div>
       </main>
