@@ -1,5 +1,6 @@
 import CornerImage from '@/components/CornerImage';
 import Link from 'next/link';
+import EmotionInput from './components/EmotionInput';
 
 export default function Mood() {
     return (
@@ -33,7 +34,10 @@ export default function Mood() {
 
             <main className="relative z-10 centered-content">
                 <h1 className="main-title">Mood Tracker</h1>
+                {/* Emotion Input */}
+                <EmotionInput />
             </main>
+    
         </div>
     )
 }
