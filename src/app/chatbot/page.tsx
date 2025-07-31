@@ -1,3 +1,5 @@
+'use client'
+
 import CornerImage from '@/components/CornerImage';
 import Link from 'next/link';
 

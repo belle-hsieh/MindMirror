@@ -1,3 +1,5 @@
+'use client'
+
 import CornerImage from '../components/CornerImage';
 
 export default function Home() {
@@ -32,7 +34,7 @@ export default function Home() {
           <h1 className="main-title">
             MindMirror:
           </h1>
-          <h2 className="subtitle">
+          <h2 className="subtitle font-400">
             Your Personal Health & Wellness Companion
           </h2>
         </div>

@@ -5,6 +5,7 @@ import {
   SignUpButton,
   SignedIn,
   SignedOut,
+  SignOutButton,
   UserButton,
 } from '@clerk/nextjs'
 import { Poppins } from 'next/font/google'
@@ -41,6 +42,7 @@ export default function RootLayout({
             </SignedOut>
             <SignedIn>
               <UserButton />
+              <SignOutButton />
             </SignedIn>
           </header>
           {children}

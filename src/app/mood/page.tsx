@@ -1,6 +1,9 @@
+'use client'
+
 import CornerImage from '@/components/CornerImage';
 import Link from 'next/link';
 import EmotionInput from './components/EmotionInput';
+import WordCloud from './components/WordCloud';
 
 export default function Mood() {
     return (
@@ -36,6 +39,8 @@ export default function Mood() {
                 <h1 className="main-title">Mood Tracker</h1>
                 {/* Emotion Input */}
                 <EmotionInput />
+                {/* Word Cloud */}
+                <WordCloud />
             </main>
     
         </div>
