@@ -1,7 +1,7 @@
 'use client'
 
 import type { EmotionEntry } from '@/types/emotion'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
 

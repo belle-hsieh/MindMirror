@@ -36,7 +36,6 @@ export default function Mood() {
                 </div>
 
             <main className="relative z-10 centered-content">
-                <h1 className="main-title">Mood Tracker</h1>
                 {/* Emotion Input */}
                 <EmotionInput />
                 {/* Word Cloud */}

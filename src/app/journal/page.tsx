@@ -2,6 +2,7 @@
 
 import CornerImage from '@/components/CornerImage';
 import Link from 'next/link';
+import JournalEditor from './components/JournalEditor';
 
 export default function Journal() {
     return (
@@ -32,8 +33,8 @@ export default function Journal() {
             <Link href="/" className="absolute top-4 left-4 z-10 text-black hover:text-purple-500 transition-colors">
                 ← Back to Home
             </Link>
-            <main className="relative z-10 centered-content">
-                <h1 className="main-title">Journal</h1>
+            <main className="relative z-10">
+                <JournalEditor />
             </main>
         </div>
     )

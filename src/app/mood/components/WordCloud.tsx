@@ -3,11 +3,10 @@
 import type { EmotionEntry } from '@/types/emotion'
 import React, { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { filterByTime } from '@/app/api/emotions/utils/filterByTime'
+import { filterByTime } from '@/app/mood/api/filterByTime'
 
 export default function WordCloud() {
     const { user, isSignedIn } = useUser()
-    const [loading, setLoading] = useState(true)
     const [weekEmotions, setWeekEmotions] = useState<EmotionEntry[]>([])
     const [monthEmotions, setMonthEmotions] = useState<EmotionEntry[]>([])
     const [threeMonthEmotions, setThreeMonthEmotions] = useState<EmotionEntry[]>([])
@@ -25,48 +24,84 @@ export default function WordCloud() {
             setWeekEmotions(week)
             setMonthEmotions(month)
             setThreeMonthEmotions(threeMonths)
-            setLoading(false)
         }
         fetchEmotions()
     }, [isSignedIn, user])
 
     const toWordCloud = (emotions: EmotionEntry[]) => {
-        return emotions
+        
+        const wordFrequency: { [key: string]: number } = {}
+        emotions
           .filter((e): e is EmotionEntry => !!e && typeof e.word === 'string')
-          .map((emotion) => ({
-            text: emotion.word,
-            value: 1,
-          }))
+          .forEach((emotion) => {
+            const word = emotion.word.toLowerCase()
+            wordFrequency[word] = (wordFrequency[word] || 0) + 1
+          })
+        
+        // Convert to array with frequency values
+        return Object.entries(wordFrequency).map(([word, count]) => ({
+          text: word,
+          value: count,
+        }))
       }
 
-    const options = {
-        rotations: 2,
-        rotationAngles: [0, 90] as [number, number],
-        fontSizes: [15, 60] as [number, number],
-        colors: [
-          '#d8b4fe', // lavender
-          '#c084fc', // light purple
-          '#a855f7', // medium purple
-          '#9333ea', // darker purple
-          '#7e22ce', // deep purple
-          '#6b21a8', // even deeper purple
-        ],
-      }
+    const colors = [
+      '#d8b4fe', // lavender
+      '#c084fc', // light purple
+      '#a855f7', // medium purple
+      '#9333ea', // darker purple
+      '#7e22ce', // deep purple
+      '#6b21a8', // even deeper purple
+    ]
 
     let cloudData = []
     if (selectedRange === 'week') cloudData = toWordCloud(weekEmotions)
     else if (selectedRange === 'month') cloudData = toWordCloud(monthEmotions)
     else cloudData = toWordCloud(threeMonthEmotions)
 
+    // Calculate font size based on frequency
+    const maxFrequency = Math.max(...cloudData.map(d => d.value), 1)
+    const minFontSize = 16
+    const maxFontSize = 72
+
     return (
         <div className="word-cloud-container">
-            <h2 className="text-center text-5xl">💭 Word Cloud 💭</h2>
+            <h2 className="text-center text-5xl mb-6 font-bold underline">💭 Word Cloud 💭</h2>
             <div className="word-cloud-sidebar">
                 <button className="button font-500 w-7/24" onClick={() => setSelectedRange('week')}>Last Week</button>
                 <button className="button font-500 w-7/24" onClick={() => setSelectedRange('month')}>Last 30 Days</button>
                 <button className="button font-500 w-7/24" onClick={() => setSelectedRange('three-months')}>Last 90 Days</button>
             </div>
-            <div className="word-cloud">
+            <div className="flex flex-wrap justify-center items-center gap-4 p-8 min-h-[400px] bg-white/90 rounded-lg">
+                {cloudData.length === 0 ? (
+                    <p className="text-gray-400 text-lg">No emotions recorded yet</p>
+                ) : (
+                    cloudData.map((word, index) => {
+                        const fontSize = minFontSize + ((word.value - 1) / (maxFrequency - 1)) * (maxFontSize - minFontSize)
+                        const color = colors[index % colors.length]
+                        const rotation = Math.random() > 0.5 ? 0 : 90
+                        
+                        return (
+                            <span
+                                key={`${word.text}-${index}`}
+                                style={{
+                                    fontSize: `${fontSize}px`,
+                                    color: color,
+                                    transform: `rotate(${rotation}deg)`,
+                                    fontWeight: 600,
+                                    padding: '8px',
+                                    display: 'inline-block',
+                                    transition: 'all 0.3s ease',
+                                    cursor: 'pointer',
+                                }}
+                                className="hover:scale-110"
+                                title={`${word.text}: ${word.value} time${word.value > 1 ? 's' : ''}`}
+                            >
+                                {word.text}
+                            </span>
+                        )
+                    })
+                )}
             </div>
         </div>
     )
