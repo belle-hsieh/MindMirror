@@ -22,7 +22,7 @@ const CornerImage: React.FC<CornerImageProps> = ({
     zIndex: 0, // Move above background but below content
     width: `${size}px`,
     height: `${size}px`,
-    opacity,
+    opacity: 'var(--mm-image-opacity, 0.18)',
   };
 
   const positionStyles = {
@@ -40,7 +40,7 @@ const CornerImage: React.FC<CornerImageProps> = ({
       <img
         src={src}
         alt={alt}
-        className="absolute inset-0 object-contain w-full h-full"
+        className={`absolute inset-0 object-contain w-full h-full pointer-events-none select-none`}
       />
     </div>
   );

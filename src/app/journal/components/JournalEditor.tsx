@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import AudioToText from './AudioToText';
 import JournalSidebar from './JournalSidebar';
@@ -13,27 +13,36 @@ export default function JournalEditor() {
   const [content, setContent] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!content.trim()) return;
-    
-    const now = new Date();
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      title: now.toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric', 
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }),
-      content,
-      date: now,
-    };
-
-    setEntries([newEntry, ...entries]);
-    setActiveEntry(newEntry);
-    setContent('');
+    try {
+      const title = getCurrentDateTime()
+      const res = await fetch('/journal/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+        credentials: 'include',
+      })
+      if (res.status === 401) {
+        alert('Please sign in to save entries.')
+        return
+      }
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to save entry')
+      const saved = json.entry
+      const newEntry: JournalEntry = {
+        id: saved.id,
+        title: saved.title,
+        content: saved.content,
+        date: new Date(saved.created_at),
+      }
+      setEntries([newEntry, ...entries])
+      setActiveEntry(newEntry)
+      setContent('')
+    } catch (e) {
+      console.error(e)
+      alert('Failed to save entry')
+    }
   };
 
   const handleAudioTranscription = (text: string) => {
@@ -67,6 +76,30 @@ export default function JournalEditor() {
       hour12: true
     });
   };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/journal/api', { credentials: 'include' })
+        if (res.status === 401) {
+          alert('Please sign in to view your journal entries.')
+          return
+        }
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error || 'Failed to load entries')
+        const mapped: JournalEntry[] = (json.entries || []).map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          content: e.content,
+          date: new Date(e.created_at),
+        }))
+        setEntries(mapped)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    load()
+  }, [])
 
   return (
     <div className="flex h-screen">

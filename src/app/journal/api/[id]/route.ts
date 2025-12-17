@@ -1,0 +1,65 @@
+import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { supabase } from '@/lib/supabase'
+
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  try {
+    const { userId } = auth()
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = params
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single()
+    if (error) throw error
+    return NextResponse.json({ entry: data })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to fetch entry' }, { status: 500 })
+  }
+}
+
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const { userId } = auth()
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = params
+    const body = await request.json()
+    const { title, content } = body as { title?: string; content?: string }
+    const updates: Record<string, any> = {}
+    if (typeof title === 'string') updates.title = title
+    if (typeof content === 'string') updates.content = content
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No updates provided' }, { status: 400 })
+    }
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single()
+    if (error) throw error
+    return NextResponse.json({ entry: data })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to update entry' }, { status: 500 })
+  }
+}
+
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+  try {
+    const { userId } = auth()
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = params
+    const { error } = await supabase
+      .from('journal_entries')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
+    if (error) throw error
+    return NextResponse.json({ ok: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to delete entry' }, { status: 500 })
+  }
+}
