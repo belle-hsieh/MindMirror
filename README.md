@@ -37,71 +37,71 @@ A wellness journaling and mental health companion app built with Next.js 15. Min
 
 ```
 MindMirror/
-├── public/                      # Static assets
+├── public/
 ├── src/
-│   ├── app/                     # Next.js App Router
-│   │   ├── api/                 # API routes
-│   │   │   ├── debug-auth/      # Authentication debugging
-│   │   │   └── gemini/          # Gemini AI endpoints
-│   │   │       └── models/      # AI model configuration
-│   │   ├── chatbot/             # AI chatbot feature
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── debug-auth/
+│   │   │   └── gemini/
+│   │   │       └── models/
+│   │   ├── chatbot/
 │   │   │   ├── api/
-│   │   │   │   └── sessions/    # Chat session management
-│   │   │   │       ├── route.ts # GET (list), POST (create)
+│   │   │   │   └── sessions/
+│   │   │   │       ├── route.ts
 │   │   │   │       └── [sessionId]/
-│   │   │   │           ├── route.ts      # DELETE, PATCH session
+│   │   │   │           ├── route.ts
 │   │   │   │           └── messages/
-│   │   │   │               └── route.ts  # GET, POST messages
+│   │   │   │               └── route.ts
 │   │   │   ├── components/
-│   │   │   │   ├── ChatSidebar.tsx     # Session list sidebar
-│   │   │   │   └── ChatWindow.tsx      # Chat interface
-│   │   │   └── page.tsx         # Chatbot page
-│   │   ├── journal/             # Journaling feature
+│   │   │   │   ├── ChatSidebar.tsx
+│   │   │   │   └── ChatWindow.tsx
+│   │   │   └── page.tsx
+│   │   ├── journal/
 │   │   │   ├── api/
-│   │   │   │   ├── route.ts     # GET (list), POST (create)
+│   │   │   │   ├── route.ts
 │   │   │   │   └── [id]/
-│   │   │   │       └── route.ts # GET, PUT, DELETE entry
+│   │   │   │       └── route.ts
 │   │   │   ├── components/
-│   │   │   │   ├── AudioToText.tsx     # Voice input
-│   │   │   │   ├── JournalEditor.tsx   # Main editor
-│   │   │   │   └── JournalSidebar.tsx  # Entry list
-│   │   │   └── page.tsx         # Journal page
-│   │   ├── mood/                # Mood tracking feature
+│   │   │   │   ├── AudioToText.tsx
+│   │   │   │   ├── JournalEditor.tsx
+│   │   │   │   └── JournalSidebar.tsx
+│   │   │   └── page.tsx
+│   │   ├── mood/
 │   │   │   ├── api/
-│   │   │   │   └── filterByTime.ts     # Time-based filtering
+│   │   │   │   └── filterByTime.ts
 │   │   │   ├── components/
-│   │   │   │   ├── EmotionInput.tsx    # Emotion entry form
-│   │   │   │   └── WordCloud.tsx       # Emotion visualization
-│   │   │   └── page.tsx         # Mood tracking page
-│   │   ├── login/               # Login page
+│   │   │   │   ├── EmotionInput.tsx
+│   │   │   │   └── WordCloud.tsx
 │   │   │   └── page.tsx
-│   │   ├── signup/              # Sign-up page
+│   │   ├── login/
 │   │   │   └── page.tsx
-│   │   ├── globals.css          # Global styles
-│   │   ├── layout.tsx           # Root layout
-│   │   └── page.tsx             # Home page
-│   ├── components/              # Shared components
-│   │   ├── CornerImage.tsx      # Decorative corner images
-│   │   ├── HeaderAuth.tsx       # Authentication header
-│   │   ├── ThemeProvider.tsx    # Theme context provider
-│   │   ├── ThemeToggle.tsx      # Dark/light mode toggle
-│   │   └── TipTap.jsx           # Rich text editor wrapper
-│   ├── lib/                     # Utility libraries
-│   │   ├── gemini.ts            # Gemini AI client
-│   │   ├── supabase.ts          # Supabase browser client
-│   │   └── supabaseServer.ts    # Supabase server client
-│   ├── types/                   # TypeScript type definitions
-│   │   ├── chat.ts              # Chat-related types
-│   │   ├── emotion.ts           # Emotion-related types
-│   │   └── journal.ts           # Journal-related types
-│   └── middleware.ts            # Auth middleware for protected routes
-├── .env.local                   # Environment variables (not in repo)
-├── eslint.config.mjs            # ESLint configuration
-├── next.config.ts               # Next.js configuration
-├── package.json                 # Dependencies
-├── postcss.config.mjs           # PostCSS configuration
-├── tailwind.config.ts           # Tailwind CSS configuration
-└── tsconfig.json                # TypeScript configuration
+│   │   ├── signup/
+│   │   │   └── page.tsx
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── CornerImage.tsx
+│   │   ├── HeaderAuth.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   ├── ThemeToggle.tsx
+│   │   └── TipTap.jsx
+│   ├── lib/
+│   │   ├── gemini.ts
+│   │   ├── supabase.ts
+│   │   └── supabaseServer.ts
+│   ├── types/
+│   │   ├── chat.ts
+│   │   ├── emotion.ts
+│   │   └── journal.ts
+│   └── middleware.ts
+├── .env.local
+├── eslint.config.mjs
+├── next.config.ts
+├── package.json
+├── postcss.config.mjs
+├── tailwind.config.ts
+└── tsconfig.json
 ```
 
 ## 🚀 Getting Started
