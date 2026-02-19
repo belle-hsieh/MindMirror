@@ -18,8 +18,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       .single()
     if (error) throw error
     return NextResponse.json({ entry: data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch entry' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch entry'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -33,7 +34,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { id } = params
     const body = await request.json()
     const { title, content } = body as { title?: string; content?: string }
-    const updates: Record<string, any> = {}
+    const updates: Record<string, string> = {}
     if (typeof title === 'string') updates.title = title
     if (typeof content === 'string') updates.content = content
     if (Object.keys(updates).length === 0) {
@@ -48,8 +49,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       .single()
     if (error) throw error
     return NextResponse.json({ entry: data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to update entry' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to update entry'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -68,7 +70,8 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
       .eq('user_id', userId)
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to delete entry' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to delete entry'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

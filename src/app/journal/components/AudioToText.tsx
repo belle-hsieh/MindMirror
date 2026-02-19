@@ -3,10 +3,42 @@ import { Mic, LoaderCircle } from "lucide-react";
 import { AudioToTextProps } from '@/types/journal';
 import { supabase } from '@/lib/supabase';
 
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: {
+    length: number;
+    [index: number]: {
+      isFinal: boolean;
+      [index: number]: { transcript: string };
+    };
+  };
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  start: () => void;
+  stop: () => void;
+  onstart: () => void;
+  onend: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+}
+
+interface WindowWithSpeechRecognition extends Window {
+  webkitSpeechRecognition: new () => SpeechRecognition;
+}
+
 export default function AudioToText({ onTranscription }: AudioToTextProps) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
     const readUser = async () => {
@@ -21,7 +53,7 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
     });
 
     if ("webkitSpeechRecognition" in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
+      const recognition = new (window as WindowWithSpeechRecognition).webkitSpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = "en-US";
@@ -31,7 +63,7 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
         setIsRecording(true);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -46,7 +78,7 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
         }
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error("Speech recognition error:", event);
         setIsRecording(false);
       };

@@ -7,7 +7,6 @@ interface CornerImageProps {
   src: string;
   alt: string;
   size?: number;
-  opacity?: number;
 }
 
 const CornerImage: React.FC<CornerImageProps> = ({
@@ -15,7 +14,6 @@ const CornerImage: React.FC<CornerImageProps> = ({
   src,
   alt,
   size = 600,
-  opacity = 0.3,
 }) => {
   const styles = {
     position: 'fixed' as const,

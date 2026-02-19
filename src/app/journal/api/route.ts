@@ -18,8 +18,9 @@ export async function GET() {
 
     if (error) throw error
     return NextResponse.json({ entries: data ?? [] })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch entries' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch entries'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
 
     if (error) throw error
     return NextResponse.json({ entry: data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to create entry' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to create entry'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -5,11 +5,17 @@ import AudioToText from './AudioToText';
 import JournalSidebar from './JournalSidebar';
 import { JournalEntry } from '@/types/journal';
 
+interface JournalEntryResponse {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+}
+
 export default function JournalEditor() {
   const [activeEntry, setActiveEntry] = useState<JournalEntry | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [content, setContent] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSave = async () => {
     if (!content.trim()) return;
@@ -81,7 +87,8 @@ export default function JournalEditor() {
   const handleSearchEntries = () => {
     const query = prompt('Search entries:');
     if (query) {
-      setSearchQuery(query.toLowerCase());
+      // Search functionality could be implemented here
+      console.log('Searching for:', query.toLowerCase());
     }
   };
 
@@ -130,7 +137,7 @@ export default function JournalEditor() {
         }
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || 'Failed to load entries')
-        const mapped: JournalEntry[] = (json.entries || []).map((e: any) => ({
+        const mapped: JournalEntry[] = (json.entries || []).map((e: JournalEntryResponse) => ({
           id: e.id,
           title: e.title,
           content: e.content,

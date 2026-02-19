@@ -27,8 +27,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ sessionId:
       .order('created_at', { ascending: true })
     if (error) throw error
     return NextResponse.json({ messages: data ?? [] })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch messages' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch messages'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -74,8 +75,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
 
     const parts = [
       { role: 'user', parts: [{ text: systemPrompt }] },
-      ...(prior || []).map((m: any) => ({ role: m.role, parts: [{ text: m.content }] })),
-    ] as any
+      ...(prior || []).map((m) => ({ role: m.role, parts: [{ text: m.content }] })),
+    ]
 
     const { text } = await generateGeminiContent(parts)
 
@@ -114,7 +115,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
     if (aErr) throw aErr
 
     return NextResponse.json({ messages: [userMsg, assistantMsg] })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to send message' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to send message'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

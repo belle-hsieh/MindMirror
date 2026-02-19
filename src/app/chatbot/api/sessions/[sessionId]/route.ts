@@ -40,8 +40,9 @@ export async function DELETE(
     if (delErr) throw delErr
 
     return NextResponse.json({ ok: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to delete session' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to delete session'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -72,7 +73,8 @@ export async function PATCH(
     if (error) throw error
 
     return NextResponse.json({ session: data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to rename session' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to rename session'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

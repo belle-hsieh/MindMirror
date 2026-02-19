@@ -16,8 +16,9 @@ export async function GET() {
       .order('created_at', { ascending: false })
     if (error) throw error
     return NextResponse.json({ sessions: data ?? [] })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch sessions' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch sessions'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -37,7 +38,8 @@ export async function POST(request: Request) {
       .single()
     if (error) throw error
     return NextResponse.json({ session: data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to create session' }, { status: 500 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to create session'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

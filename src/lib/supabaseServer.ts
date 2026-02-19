@@ -1,9 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
+import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const createSupabaseServerClient = (cookieStore: any) =>
+export const createSupabaseServerClient = (cookieStore: ReadonlyRequestCookies) =>
   createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get: (name) => cookieStore.get(name)?.value,
