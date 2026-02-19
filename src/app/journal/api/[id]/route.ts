@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { cookies } from 'next/headers'
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies()
     const supabase = createSupabaseServerClient(cookieStore)
     const { data: authData } = await supabase.auth.getUser()
     const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { id } = params
+    const { id } = await params
     const { data, error } = await supabase
       .from('journal_entries')
       .select('*')
@@ -24,14 +24,14 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies()
     const supabase = createSupabaseServerClient(cookieStore)
     const { data: authData } = await supabase.auth.getUser()
     const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const { title, content } = body as { title?: string; content?: string }
     const updates: Record<string, string> = {}
@@ -55,14 +55,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies()
     const supabase = createSupabaseServerClient(cookieStore)
     const { data: authData } = await supabase.auth.getUser()
     const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { id } = params
+    const { id } = await params
     const { error } = await supabase
       .from('journal_entries')
       .delete()
