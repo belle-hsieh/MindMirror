@@ -251,14 +251,6 @@ This separation was intentional for several reasons:
 
 As I future project, I plan to enhance the mood tracking feature with **automatic emotion extraction from journal entries** using Natural Language Processing.
 
-The current manual system allows us to:
-- Validate user needs and usage patterns
-- Build a dataset of user-labeled emotions for future training
-- Keep the MVP focused and performant
-- Avoid over-engineering before product-market fit
-
-Once we have sufficient user feedback and usage data, we'll implement NLP enhancement as a **value-add feature** rather than a replacement for manual tracking.
-
 ## 📝 API Routes
 
 ### Journal API
