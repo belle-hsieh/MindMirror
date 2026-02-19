@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { supabase } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { cookies } from 'next/headers'
 
 export async function GET() {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { data, error } = await supabase
       .from('chat_sessions')
@@ -20,7 +23,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await request.json().catch(() => ({}))
     const title: string = body?.title || 'New Chat'

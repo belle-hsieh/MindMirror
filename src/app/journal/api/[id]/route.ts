@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { supabase } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { cookies } from 'next/headers'
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { id } = params
     const { data, error } = await supabase
@@ -22,7 +25,10 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { id } = params
     const body = await request.json()
@@ -49,7 +55,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { id } = params
     const { error } = await supabase

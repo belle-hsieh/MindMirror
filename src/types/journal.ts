@@ -20,6 +20,8 @@ export interface JournalSidebarProps {
     onSelectEntry: OnSelectEntry;
     onNewEntry: () => void;
     onSearchEntries: () => void;
+    onDeleteEntry: (entryId: string) => void;
+    onRenameEntry: (entryId: string, title: string) => void;
 }
 
 export interface JournalEditorProps {

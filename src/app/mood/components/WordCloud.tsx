@@ -2,31 +2,61 @@
 
 import type { EmotionEntry } from '@/types/emotion'
 import React, { useState, useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
 import { filterByTime } from '@/app/mood/api/filterByTime'
+import { supabase } from '@/lib/supabase'
 
 export default function WordCloud() {
-    const { user, isSignedIn } = useUser()
+    const [userId, setUserId] = useState<string | null>(null)
+    const [isSignedIn, setIsSignedIn] = useState(false)
     const [weekEmotions, setWeekEmotions] = useState<EmotionEntry[]>([])
     const [monthEmotions, setMonthEmotions] = useState<EmotionEntry[]>([])
     const [threeMonthEmotions, setThreeMonthEmotions] = useState<EmotionEntry[]>([])
     const [selectedRange, setSelectedRange] = useState<'week' | 'month' | 'three-months'>('week')
 
     useEffect(() => {
-        if (!isSignedIn || !user) return
+        const readUser = async () => {
+            const { data } = await supabase.auth.getUser()
+            if (data.user) {
+                setUserId(data.user.id)
+                setIsSignedIn(true)
+            } else {
+                setUserId(null)
+                setIsSignedIn(false)
+            }
+        }
+
+        readUser()
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                setUserId(session.user.id)
+                setIsSignedIn(true)
+            } else {
+                setUserId(null)
+                setIsSignedIn(false)
+            }
+        })
+
+        return () => {
+            authListener.subscription.unsubscribe()
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!isSignedIn || !userId) return
         
         const fetchEmotions = async () => {
             const [week, month, threeMonths] = await Promise.all([
-                filterByTime(user.id, 'week'),
-                filterByTime(user.id, 'month'),
-                filterByTime(user.id, 'three-months')
+                filterByTime(userId, 'week'),
+                filterByTime(userId, 'month'),
+                filterByTime(userId, 'three-months')
             ])
             setWeekEmotions(week)
             setMonthEmotions(month)
             setThreeMonthEmotions(threeMonths)
         }
         fetchEmotions()
-    }, [isSignedIn, user])
+    }, [isSignedIn, userId])
 
     const toWordCloud = (emotions: EmotionEntry[]) => {
         

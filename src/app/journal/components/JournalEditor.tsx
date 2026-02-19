@@ -1,13 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
 import AudioToText from './AudioToText';
 import JournalSidebar from './JournalSidebar';
 import { JournalEntry } from '@/types/journal';
 
 export default function JournalEditor() {
-  const { user, isSignedIn } = useUser();
   const [activeEntry, setActiveEntry] = useState<JournalEntry | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [content, setContent] = useState('');
@@ -58,12 +56,57 @@ export default function JournalEditor() {
     setContent('');
   };
 
+  const handleDeleteEntry = async (entryId: string) => {
+    const confirmed = window.confirm('Delete this entry? This cannot be undone.')
+    if (!confirmed) return
+    try {
+      const res = await fetch(`/journal/api/${entryId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Failed to delete entry')
+
+      setEntries((prev) => prev.filter((entry) => entry.id !== entryId))
+      if (activeEntry?.id === entryId) {
+        setActiveEntry(null)
+        setContent('')
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Failed to delete entry')
+    }
+  }
+
   const handleSearchEntries = () => {
     const query = prompt('Search entries:');
     if (query) {
       setSearchQuery(query.toLowerCase());
     }
   };
+
+  const handleRenameEntry = async (entryId: string, title: string) => {
+    try {
+      const res = await fetch(`/journal/api/${entryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+        credentials: 'include',
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Failed to rename entry')
+
+      setEntries((prev) =>
+        prev.map((entry) => (entry.id === entryId ? { ...entry, title } : entry))
+      )
+      if (activeEntry?.id === entryId) {
+        setActiveEntry({ ...activeEntry, title })
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Failed to rename entry')
+    }
+  }
 
   const getCurrentDateTime = () => {
     const now = new Date();
@@ -110,6 +153,8 @@ export default function JournalEditor() {
         onSelectEntry={setActiveEntry}
         onNewEntry={handleNewEntry}
         onSearchEntries={handleSearchEntries}
+        onDeleteEntry={handleDeleteEntry}
+        onRenameEntry={handleRenameEntry}
       />
 
       {/* Main Editor */}

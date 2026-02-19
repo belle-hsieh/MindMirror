@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import CornerImage from '@/components/CornerImage'
 
 interface Message {
   id: string
@@ -9,7 +10,13 @@ interface Message {
   created_at: string
 }
 
-export default function ChatWindow({ sessionId }: { sessionId: string | null }) {
+export default function ChatWindow({
+  sessionId,
+  onCreateSession,
+}: {
+  sessionId: string | null
+  onCreateSession: () => Promise<string | null>
+}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
@@ -39,10 +46,18 @@ export default function ChatWindow({ sessionId }: { sessionId: string | null }) 
   }, [sessionId])
 
   const send = async () => {
-    if (!sessionId || !input.trim() || busy) return
+    if (!input.trim() || busy) return
+    let activeSessionId = sessionId
+    if (!activeSessionId) {
+      activeSessionId = await onCreateSession()
+    }
+    if (!activeSessionId) {
+      alert('Unable to create a new chat. Please try again.')
+      return
+    }
     setBusy(true)
     try {
-      const res = await fetch(`/chatbot/api/sessions/${sessionId}/messages`, {
+      const res = await fetch(`/chatbot/api/sessions/${activeSessionId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: input }),
@@ -65,7 +80,13 @@ export default function ChatWindow({ sessionId }: { sessionId: string | null }) 
   }
 
   return (
-    <section className="flex-1 h-screen flex flex.col bg-white">
+    <section className="flex-1 h-screen flex flex-col relative">
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <CornerImage position="top-left" src="/corner-top-left.png" alt="Top-left corner decoration" />
+        <CornerImage position="top-right" src="/corner-top-right.png" alt="Top-right corner decoration" />
+        <CornerImage position="bottom-left" src="/corner-bottom-left.png" alt="Bottom-left corner decoration" />
+        <CornerImage position="bottom-right" src="/corner-bottom-right.png" alt="Bottom-right corner decoration" />
+      </div>
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto px-6 pb-24">
           {messages.length === 0 ? (
@@ -88,18 +109,18 @@ export default function ChatWindow({ sessionId }: { sessionId: string | null }) 
           <div ref={endRef} />
         </div>
       </div>
-      <div className="fixed bottom-0 left-72 right-0 bg-gradient-to-t from.white to-transparent">
+      <div className="fixed bottom-0 left-72 right-0 bg-gradient-to-t from-white to-transparent">
         <div className="max-w-2xl mx-auto px-6 py-4">
           <div className="flex gap-2">
             <input
               className="flex-1 h-12 px-4 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-[#6c47ff]"
-              placeholder={sessionId ? 'Send a message…' : 'Create or select a chat'}
+              placeholder={sessionId ? 'Send a message…' : 'Start a new chat…'}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') send()
               }}
-              disabled={!sessionId || busy}
+              disabled={busy}
             />
             <button
               className="h-12 px-4 rounded-md bg-[#6c47ff] text-white hover:bg-[#5a36f0] transition"

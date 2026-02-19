@@ -1,25 +1,54 @@
 'use client'
 
 import type { EmotionEntry } from '@/types/emotion'
-import React, { useState } from 'react'
-import { useUser } from '@clerk/nextjs'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function EmotionInput() {
-    const { user, isSignedIn } = useUser()
+    const [userId, setUserId] = useState<string | null>(null)
+    const [isSignedIn, setIsSignedIn] = useState(false)
     const [input, setInput] = useState('')
     const [emotions, setEmotions] = useState<EmotionEntry[]>([])
 
+    useEffect(() => {
+        const readUser = async () => {
+            const { data } = await supabase.auth.getUser()
+            if (data.user) {
+                setUserId(data.user.id)
+                setIsSignedIn(true)
+            } else {
+                setUserId(null)
+                setIsSignedIn(false)
+            }
+        }
+
+        readUser()
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                setUserId(session.user.id)
+                setIsSignedIn(true)
+            } else {
+                setUserId(null)
+                setIsSignedIn(false)
+            }
+        })
+
+        return () => {
+            authListener.subscription.unsubscribe()
+        }
+    }, [])
+
     const handleSubmit = async () =>{
         if (!input.trim()) return
-        if (!user?.id) return
+        if (!userId) return
         if (!isSignedIn) {
             alert('Please sign in to add emotions.')
             return
         }
 
         const newEmotion: EmotionEntry = {  
-            userId: user.id,
+            userId,
             word: input,
             timestamp: new Date().toISOString(),
         }
@@ -31,7 +60,7 @@ export default function EmotionInput() {
         const { error: filterError } = await supabase
             .from('Emotions')
             .delete()
-            .eq('userId', user.id)
+            .eq('userId', userId)
             .lt('timestamp', cutoffTime)
 
         if (addError || filterError) {
@@ -43,7 +72,7 @@ export default function EmotionInput() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!user?.id) return
+        if (!userId) return
         if (!isSignedIn) {
             alert('Please sign in to delete emotions.')
             return
@@ -52,7 +81,7 @@ export default function EmotionInput() {
         const { error: deleteError } = await supabase
             .from('Emotions')
             .delete()
-            .eq('userId', user.id)
+            .eq('userId', userId)
             .eq('id', id)
 
         if (deleteError) {

@@ -1,15 +1,25 @@
 import { useEffect, useState, useRef } from "react";
 import { Mic, LoaderCircle } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
 import { AudioToTextProps } from '@/types/journal';
+import { supabase } from '@/lib/supabase';
 
 export default function AudioToText({ onTranscription }: AudioToTextProps) {
-  const { user, isSignedIn } = useUser();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const readUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setIsSignedIn(!!data.user);
+    };
+
+    readUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(!!session?.user);
+    });
+
     if ("webkitSpeechRecognition" in window) {
       const recognition = new (window as any).webkitSpeechRecognition();
       recognition.continuous = true;
@@ -19,28 +29,9 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
 
       recognition.onstart = () => {
         setIsRecording(true);
-        // Start silence timer
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
-        silenceTimerRef.current = setTimeout(() => {
-          if (recognitionRef.current) {
-            recognitionRef.current.stop();
-          }
-        }, 2000);
       };
 
       recognition.onresult = (event: any) => {
-        // Reset silence timer on new speech
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
-        silenceTimerRef.current = setTimeout(() => {
-          if (recognitionRef.current && isRecording) {
-            recognitionRef.current.stop();
-          }
-        }, 3000);
-
         let finalTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -58,27 +49,19 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error:", event);
         setIsRecording(false);
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
       };
 
       recognition.onend = () => {
         setIsRecording(false);
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
       };
 
       recognitionRef.current = recognition;
     }
 
     return () => {
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-      }
+      authListener.subscription.unsubscribe();
     };
-  }, [onTranscription, isRecording]);
+  }, [onTranscription]);
 
   const handleClick = () => {
     if (!isSignedIn) {
@@ -94,9 +77,6 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
     if (isRecording) {
       try {
         recognitionRef.current.stop();
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
       } catch (error) {
         console.error("Error stopping recognition:", error);
         setIsRecording(false);

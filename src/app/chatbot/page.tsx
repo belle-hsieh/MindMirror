@@ -9,10 +9,24 @@ import ChatWindow from './components/ChatWindow'
 export default function Chatbot() {
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
 
-    const createSession = async () => {
-        const res = await fetch('/chatbot/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
-        const json = await res.json()
-        if (json.session?.id) setActiveSessionId(json.session.id)
+    const createSession = async (): Promise<string | null> => {
+        const res = await fetch('/chatbot/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({}),
+            credentials: 'include',
+        })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) {
+            alert(json.error || 'Failed to create chat')
+            return null
+        }
+        if (json.session?.id) {
+            setActiveSessionId(json.session.id)
+            return json.session.id as string
+        }
+        alert('Chat session was not created.')
+        return null
     }
 
     return (
@@ -28,8 +42,15 @@ export default function Chatbot() {
             </Link>
             <main className="relative z-10">
                 <div className="flex">
-                    <ChatSidebar activeId={activeSessionId} onSelect={setActiveSessionId} onCreate={createSession} />
-                    <ChatWindow sessionId={activeSessionId} />
+                    <ChatSidebar
+                        activeId={activeSessionId}
+                        onSelect={setActiveSessionId}
+                        onCreate={createSession}
+                        onDeleted={(id) => {
+                            if (activeSessionId === id) setActiveSessionId(null)
+                        }}
+                    />
+                    <ChatWindow sessionId={activeSessionId} onCreateSession={createSession} />
                 </div>
             </main>
         </div>

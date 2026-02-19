@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { supabase } from '@/lib/supabase'
-import { getGeminiModel } from '@/lib/gemini'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { generateGeminiContent } from '@/lib/gemini'
+import { cookies } from 'next/headers'
 
-export async function GET(_: Request, { params }: { params: { sessionId: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { sessionId } = params
+    const { sessionId } = await params
     // Ensure session belongs to user
     const { data: session, error: sErr } = await supabase
       .from('chat_sessions')
@@ -29,20 +32,23 @@ export async function GET(_: Request, { params }: { params: { sessionId: string 
   }
 }
 
-export async function POST(request: Request, { params }: { params: { sessionId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   try {
-    const { userId } = auth()
+    const cookieStore = await cookies()
+    const supabase = createSupabaseServerClient(cookieStore)
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { sessionId } = params
+    const { sessionId } = await params
     const body = await request.json()
-    const { content, system } = body as { content?: string; system?: string }
+    const { content } = body as { content?: string }
     if (!content || !content.trim()) {
       return NextResponse.json({ error: 'content required' }, { status: 400 })
     }
     // Ensure session belongs to user
     const { data: session, error: sErr } = await supabase
       .from('chat_sessions')
-      .select('id')
+      .select('id, title')
       .eq('id', sessionId)
       .eq('user_id', userId)
       .single()
@@ -64,16 +70,41 @@ export async function POST(request: Request, { params }: { params: { sessionId: 
       .order('created_at', { ascending: true })
       .limit(30)
 
-    const model = getGeminiModel()
-    const systemPrompt = system?.trim() || 'You are a helpful wellness journaling assistant.'
+    const systemPrompt = 'You are a helpful wellness journaling assistant.'
 
     const parts = [
       { role: 'user', parts: [{ text: systemPrompt }] },
       ...(prior || []).map((m: any) => ({ role: m.role, parts: [{ text: m.content }] })),
     ] as any
 
-    const res = await model.generateContent({ contents: parts })
-    const text = res.response.text()
+    const { text } = await generateGeminiContent(parts)
+
+    if (!session.title || session.title === 'New Chat') {
+      try {
+        const titlePrompt = `Create a short title (max 6 words) for this chat based on the first user message. Return only the title.`
+        const { text: titleRaw } = await generateGeminiContent([
+          { role: 'user', parts: [{ text: titlePrompt }] },
+          { role: 'user', parts: [{ text: content }] },
+        ])
+        const titleText = titleRaw.trim().replace(/\s+/g, ' ')
+        if (titleText) {
+          await supabase
+            .from('chat_sessions')
+            .update({ title: titleText })
+            .eq('id', sessionId)
+            .eq('user_id', userId)
+        }
+      } catch {
+        const fallback = content.trim().slice(0, 48)
+        if (fallback) {
+          await supabase
+            .from('chat_sessions')
+            .update({ title: fallback })
+            .eq('id', sessionId)
+            .eq('user_id', userId)
+        }
+      }
+    }
 
     const { data: assistantMsg, error: aErr } = await supabase
       .from('chat_messages')
