@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
 
         setIsValidToken(true)
         setIsChecking(false)
-      } catch (err) {
+      } catch (_err) {
         setUrlError('An error occurred. Please try again.')
         setIsValidToken(false)
         setIsChecking(false)

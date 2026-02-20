@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 interface CornerImageProps {
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -35,9 +36,10 @@ const CornerImage: React.FC<CornerImageProps> = ({
       style={{ ...styles, ...positionStyles[position] }}
       className="relative"
     >
-      <img
+      <Image
         src={src}
         alt={alt}
+        fill
         className={`absolute inset-0 object-contain w-full h-full pointer-events-none select-none`}
       />
     </div>

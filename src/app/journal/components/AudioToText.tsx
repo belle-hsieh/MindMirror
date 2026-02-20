@@ -83,7 +83,7 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
         }
       };
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      recognition.onerror = (_event: SpeechRecognitionErrorEvent) => {
         setIsRecording(false);
       };
 
@@ -113,13 +113,13 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
     if (isRecording) {
       try {
         recognitionRef.current.stop();
-      } catch (error) {
+      } catch (_error) {
         setIsRecording(false);
       }
     } else {
       try {
         recognitionRef.current.start();
-      } catch (error) {
+      } catch (_error) {
         // Silent error handling
       }
     }
