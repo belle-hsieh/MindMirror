@@ -114,15 +114,13 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
     if (isRecording) {
       try {
         recognitionRef.current.stop();
-      } catch (_error) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_error) { // eslint-disable-line @typescript-eslint/no-unused-vars
         setIsRecording(false);
       }
     } else {
       try {
         recognitionRef.current.start();
-      } catch (_error) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_error) { // eslint-disable-line @typescript-eslint/no-unused-vars
         // Silent error handling
       }
     }

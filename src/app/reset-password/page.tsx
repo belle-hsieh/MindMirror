@@ -53,8 +53,7 @@ export default function ResetPasswordPage() {
 
         setIsValidToken(true)
         setIsChecking(false)
-      } catch (_err) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_err) { // eslint-disable-line @typescript-eslint/no-unused-vars
         setUrlError('An error occurred. Please try again.')
         setIsValidToken(false)
         setIsChecking(false)
