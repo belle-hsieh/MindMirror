@@ -87,7 +87,6 @@ export default function JournalEditor() {
   const handleSearchEntries = () => {
     const query = prompt('Search entries:');
     if (query) {
-      // Search functionality could be implemented here
       console.log('Searching for:', query.toLowerCase());
     }
   };

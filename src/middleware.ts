@@ -4,12 +4,14 @@ import { createServerClient } from '@supabase/ssr'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+// Define routes that require user authentication
 const isProtectedRoute = (pathname: string) =>
-  pathname.startsWith('/chatbot') || pathname.startsWith('/journal') || pathname.startsWith('/mood')
+  pathname.startsWith('/chatbot') || pathname.startsWith('/journal') || pathname.startsWith('/mood') || pathname.startsWith('/profile')
 
 export default async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request })
 
+  // Initialize Supabase client for server-side auth check
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get: (name) => request.cookies.get(name)?.value,
@@ -22,6 +24,7 @@ export default async function middleware(request: NextRequest) {
     },
   })
 
+  // Check if user is authenticated; if not and route is protected, redirect to login
   const { data } = await supabase.auth.getUser()
   if (!data.user && isProtectedRoute(request.nextUrl.pathname)) {
     const redirectUrl = new URL('/login', request.url)

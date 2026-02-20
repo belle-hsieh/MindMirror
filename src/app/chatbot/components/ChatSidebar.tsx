@@ -68,7 +68,6 @@ export default function ChatSidebar({
     }
     const json = await res.json()
     if (!res.ok) {
-      console.error(json.error)
       return
     }
     setSessions(json.sessions || [])

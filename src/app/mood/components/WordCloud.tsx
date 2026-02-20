@@ -46,6 +46,7 @@ export default function WordCloud() {
         if (!isSignedIn || !userId) return
         
         const fetchEmotions = async () => {
+            // Fetch emotions for three time ranges in parallel using Promise.all
             const [week, month, threeMonths] = await Promise.all([
                 filterByTime(userId, 'week'),
                 filterByTime(userId, 'month'),
@@ -60,6 +61,7 @@ export default function WordCloud() {
 
     const toWordCloud = (emotions: EmotionEntry[]) => {
         
+        // Count frequency of each emotion word (case-insensitive)
         const wordFrequency: { [key: string]: number } = {}
         emotions
           .filter((e): e is EmotionEntry => !!e && typeof e.word === 'string')
@@ -68,7 +70,7 @@ export default function WordCloud() {
             wordFrequency[word] = (wordFrequency[word] || 0) + 1
           })
         
-        // Convert to array with frequency values
+        // Transform frequency map into array format for visualization
         return Object.entries(wordFrequency).map(([word, count]) => ({
           text: word,
           value: count,
@@ -89,7 +91,7 @@ export default function WordCloud() {
     else if (selectedRange === 'month') cloudData = toWordCloud(monthEmotions)
     else cloudData = toWordCloud(threeMonthEmotions)
 
-    // Calculate font size based on frequency
+    // Calculate font size based on word frequency (more frequent = larger text)
     const maxFrequency = Math.max(...cloudData.map(d => d.value), 1)
     const minFontSize = 16
     const maxFontSize = 72
@@ -107,8 +109,11 @@ export default function WordCloud() {
                     <p className="text-gray-400 text-lg">No emotions recorded yet</p>
                 ) : (
                     cloudData.map((word, index) => {
+                        // Map word frequency to font size (linear interpolation between min and max)
                         const fontSize = minFontSize + ((word.value - 1) / (maxFrequency - 1)) * (maxFontSize - minFontSize)
+                        // Cycle through purple color palette for visual variety
                         const color = colors[index % colors.length]
+                        // Randomly rotate words for visual interest
                         const rotation = Math.random() > 0.5 ? 0 : 90
                         
                         return (

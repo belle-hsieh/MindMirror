@@ -2,14 +2,16 @@
 
 A wellness journaling and mental health companion app built with Next.js 15. MindMirror helps users track their mental well-being through journaling, mood tracking, and AI-powered conversational support.
 
+🔗 **Live Demo**: [https://mind-mirror-eight.vercel.app/](https://mind-mirror-eight.vercel.app/)
+
 ## ✨ Features
 
 - **Journal Entries**: Write and manage personal journal entries with a rich text editor
 - **Mood Tracking**: Track emotions over time with visual word cloud representations
 - **AI Chatbot**: Conversational wellness assistant powered by Google Gemini AI
 - **Voice Input**: Speech-to-text functionality for hands-free journaling
-- **Dark/Light Mode**: Theme toggle for comfortable viewing
-- **User Authentication**: Secure sign-up and login with Supabase Auth
+- **User Authentication**: Secure sign-up, login, password reset with Supabase Auth
+- **Password Management**: Forgot password and password reset functionality
 
 ## 🛠️ Tech Stack
 
@@ -29,9 +31,8 @@ A wellness journaling and mental health companion app built with Next.js 15. Min
   - Real-time subscriptions
 - **[Supabase SSR](https://supabase.com/docs/guides/auth/server-side-rendering)** - Server-side authentication
 
-### AI & Rich Text
+### AI
 - **[Google Generative AI](https://ai.google.dev/)** - Gemini AI integration for chatbot
-- **[TipTap](https://tiptap.dev/)** - Rich text editor
 
 ## 📁 Project Structure
 
@@ -40,10 +41,6 @@ MindMirror/
 ├── public/
 ├── src/
 │   ├── app/
-│   │   ├── api/
-│   │   │   ├── debug-auth/
-│   │   │   └── gemini/
-│   │   │       └── models/
 │   │   ├── chatbot/
 │   │   │   ├── api/
 │   │   │   │   └── sessions/
@@ -77,15 +74,18 @@ MindMirror/
 │   │   │   └── page.tsx
 │   │   ├── signup/
 │   │   │   └── page.tsx
+│   │   ├── forgot-password/
+│   │   │   └── page.tsx
+│   │   ├── reset-password/
+│   │   │   └── page.tsx
+│   │   ├── profile/
+│   │   │   └── page.tsx
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── components/
 │   │   ├── CornerImage.tsx
-│   │   ├── HeaderAuth.tsx
-│   │   ├── ThemeProvider.tsx
-│   │   ├── ThemeToggle.tsx
-│   │   └── TipTap.jsx
+│   │   └── HeaderAuth.tsx
 │   ├── lib/
 │   │   ├── gemini.ts
 │   │   ├── supabase.ts
@@ -206,8 +206,16 @@ The app uses Supabase Authentication with middleware protection for:
 - `/chatbot` - AI chat interface
 - `/journal` - Journal entries
 - `/mood` - Mood tracking
+- `/profile` - User profile settings
 
 Unauthenticated users are redirected to `/login` with a redirect parameter.
+
+### Authentication Pages
+- `/login` - User sign in
+- `/signup` - User registration
+- `/forgot-password` - Request password reset
+- `/reset-password` - Set new password
+- `/profile` - User profile and account settings
 
 ## 🎨 Features in Detail
 
@@ -270,7 +278,12 @@ As I future project, I plan to enhance the mood tracking feature with **automati
 
 ## 🚢 Deployment
 
-The app is configured for deployment on [Vercel](https://vercel.com/):
+The app is currently deployed on **[Vercel](https://vercel.com/)** and live at:
+👉 **[https://mind-mirror-eight.vercel.app/](https://mind-mirror-eight.vercel.app/)**
+
+### Deploy Your Own
+
+To deploy your own version:
 
 1. Push your code to GitHub
 2. Import the project on Vercel

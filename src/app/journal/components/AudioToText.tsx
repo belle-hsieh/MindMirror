@@ -54,7 +54,9 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
 
     if ("webkitSpeechRecognition" in window) {
       const recognition = new (window as WindowWithSpeechRecognition).webkitSpeechRecognition();
+      // continuous: keep listening until explicitly stopped (not just first phrase)
       recognition.continuous = true;
+      // interimResults: emit ongoing transcription predictions before speech ends
       recognition.interimResults = true;
       recognition.lang = "en-US";
       recognition.maxAlternatives = 1;
@@ -66,20 +68,22 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
         
+        // Process speech recognition results starting from the last processed index
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
+          // Only add results marked as final (not interim predictions)
           if (event.results[i].isFinal) {
             finalTranscript += transcript + ' ';
           }
         }
         
+        // Call callback only when we have final transcription
         if (finalTranscript) {
           onTranscription(finalTranscript);
         }
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error("Speech recognition error:", event);
         setIsRecording(false);
       };
 
@@ -110,14 +114,13 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
       try {
         recognitionRef.current.stop();
       } catch (error) {
-        console.error("Error stopping recognition:", error);
         setIsRecording(false);
       }
     } else {
       try {
         recognitionRef.current.start();
       } catch (error) {
-        console.error("Error starting recognition:", error);
+        // Silent error handling
       }
     }
   };

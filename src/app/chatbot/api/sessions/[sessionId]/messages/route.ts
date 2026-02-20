@@ -11,7 +11,6 @@ export async function GET(_: Request, { params }: { params: Promise<{ sessionId:
     const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { sessionId } = await params
-    // Ensure session belongs to user
     const { data: session, error: sErr } = await supabase
       .from('chat_sessions')
       .select('id')
@@ -35,18 +34,22 @@ export async function GET(_: Request, { params }: { params: Promise<{ sessionId:
 
 export async function POST(request: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   try {
+    // Authenticate user and extract session ID from URL params
     const cookieStore = await cookies()
     const supabase = createSupabaseServerClient(cookieStore)
     const { data: authData } = await supabase.auth.getUser()
     const userId = authData.user?.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { sessionId } = await params
+    
+    // Validate request body
     const body = await request.json()
     const { content } = body as { content?: string }
     if (!content || !content.trim()) {
       return NextResponse.json({ error: 'content required' }, { status: 400 })
     }
-    // Ensure session belongs to user
+    
+    // Verify this chat session belongs to the authenticated user (security check)
     const { data: session, error: sErr } = await supabase
       .from('chat_sessions')
       .select('id, title')
@@ -55,7 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
       .single()
     if (sErr || !session) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    // Insert user message
+    // Store user's message in the database
     const { data: userMsg, error: uErr } = await supabase
       .from('chat_messages')
       .insert({ session_id: sessionId, role: 'user', content })
@@ -63,7 +66,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
       .single()
     if (uErr) throw uErr
 
-    // Build context: latest messages
+    // Fetch conversation history (up to 30 recent messages) to provide context to Gemini
     const { data: prior } = await supabase
       .from('chat_messages')
       .select('role, content')
@@ -71,13 +74,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
       .order('created_at', { ascending: true })
       .limit(30)
 
+    // System prompt defines the AI's behavior and role
     const systemPrompt = 'You are a helpful wellness journaling assistant.'
 
+    // Format conversation history for Gemini API (system message + prior messages)
     const parts = [
       { role: 'user', parts: [{ text: systemPrompt }] },
       ...(prior || []).map((m) => ({ role: m.role, parts: [{ text: m.content }] })),
     ]
 
+    // Call Gemini to generate AI response based on conversation history
     const { text } = await generateGeminiContent(parts)
 
     if (!session.title || session.title === 'New Chat') {

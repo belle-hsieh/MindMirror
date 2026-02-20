@@ -2,13 +2,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
 
-if (!apiKey) {
-  // Avoid throwing at import time in serverless; errors will surface on call.
-  console.warn('[gemini] Missing GEMINI_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY')
-}
+// Note: API key validation will occur at runtime when generateGeminiContent is called
 
 type GeminiContents = Array<{ role: string; parts: Array<{ text: string }> }>
 
+// Generate candidate model names to try (falls back gracefully if primary model unavailable)
 const getModelCandidates = (preferred?: string) => {
   const candidates = [
     preferred,
@@ -46,16 +44,19 @@ export async function generateGeminiContent(contents: GeminiContents, preferredM
   const models = getModelCandidates(preferredModel)
   let lastError: unknown = null
 
+  // Try each model candidate until one succeeds (graceful degradation if primary unavailable)
   for (const modelName of models) {
     try {
       const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion })
       const res = await model.generateContent({ contents })
       return { text: res.response.text(), modelName }
     } catch (error) {
+      // Continue to next model on failure
       lastError = error
     }
   }
 
+  // All models failed - throw error with debugging info
   const details = models.length ? ` Tried: ${models.join(', ')}` : ''
   const baseError = lastError instanceof Error ? lastError : new Error('Failed to generate content')
   throw new Error(`${baseError.message}${details}`)

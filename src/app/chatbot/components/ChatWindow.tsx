@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import CornerImage from '@/components/CornerImage'
+import { supabase } from '@/lib/supabase'
 
 interface Message {
   id: string
@@ -20,12 +21,31 @@ export default function ChatWindow({
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
+  const [userInitials, setUserInitials] = useState('U')
   const endRef = useRef<HTMLDivElement | null>(null)
 
+  // Extract user's first and last name initials from profile to show in chat bubbles
+  useEffect(() => {
+    const fetchUserInitials = async () => {
+      const { data } = await supabase.auth.getUser()
+      if (data.user) {
+        const firstName = data.user.user_metadata?.first_name || ''
+        const lastName = data.user.user_metadata?.last_name || ''
+        if (firstName || lastName) {
+          const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+          setUserInitials(initials || 'U')
+        }
+      }
+    }
+    fetchUserInitials()
+  }, [])
+
+  // Auto-scroll to bottom when new messages arrive (needed in chat interfaces)
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Load conversation history when session ID changes
   useEffect(() => {
     const load = async () => {
       if (!sessionId) return
@@ -98,7 +118,7 @@ export default function ChatWindow({
             messages.map((m) => (
               <div key={m.id} className="w-full my-4">
                 <div className="flex gap-4">
-                  <div className={`w-8 h-8 rounded-sm flex-shrink-0 flex items-center justify-center ${m.role === 'user' ? 'bg-[#6c47ff] text-white' : 'bg-[#ede9fe] text-[#6c47ff]'}`}>{m.role === 'user' ? 'U' : 'MM'}</div>
+                  <div className={`w-8 h-8 rounded-sm flex-shrink-0 flex items-center justify-center text-xs font-semibold ${m.role === 'user' ? 'bg-[#6c47ff] text-white' : 'bg-[#ede9fe] text-[#6c47ff]'}`}>{m.role === 'user' ? userInitials : 'MM'}</div>
                   <div className="flex-1 whitespace-pre-wrap leading-relaxed text-[15px]">
                     {m.content}
                   </div>

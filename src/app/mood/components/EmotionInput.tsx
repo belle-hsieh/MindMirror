@@ -55,6 +55,7 @@ export default function EmotionInput() {
 
         const { error : addError, data } = await supabase.from('Emotions').insert(newEmotion).select()
 
+        // Clean up old emotions beyond 90 days to keep storage lean
         const cutoffTime = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
         const { error: filterError } = await supabase
@@ -64,7 +65,6 @@ export default function EmotionInput() {
             .lt('timestamp', cutoffTime)
 
         if (addError || filterError) {
-            console.error('Error saving emotion:', addError || filterError)
             return
         }
         setEmotions([...emotions, data[0]])
@@ -85,7 +85,6 @@ export default function EmotionInput() {
             .eq('id', id)
 
         if (deleteError) {
-            console.error('Error deleting emotion:', deleteError)
             return
         }
         

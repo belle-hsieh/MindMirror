@@ -70,6 +70,11 @@ function LoginForm() {
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
+      <div className="mt-4 text-right">
+        <Link className="text-sm text-blue-600 hover:text-blue-800 font-medium" href="/forgot-password">
+          Forgot password?
+        </Link>
+      </div>
       <p className="mt-6 text-sm text-gray-600">
         New here?{' '}
         <Link className="text-black font-medium" href="/signup">

@@ -55,9 +55,12 @@ export default function HeaderAuth() {
         </>
       ) : (
         <>
-          <span className="text-sm sm:text-base font-medium text-gray-700">
-            {user.email ?? 'Signed in'}
-          </span>
+          <Link
+            className="text-sm sm:text-base font-medium text-gray-700 hover:text-gray-900"
+            href="/profile"
+          >
+            {user.email ?? 'Profile'}
+          </Link>
           <button
             className="text-sm sm:text-base font-medium"
             onClick={handleSignOut}
