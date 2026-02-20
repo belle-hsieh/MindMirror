@@ -83,6 +83,7 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
         }
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       recognition.onerror = (_event: SpeechRecognitionErrorEvent) => {
         setIsRecording(false);
       };
@@ -114,12 +115,14 @@ export default function AudioToText({ onTranscription }: AudioToTextProps) {
       try {
         recognitionRef.current.stop();
       } catch (_error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         setIsRecording(false);
       }
     } else {
       try {
         recognitionRef.current.start();
       } catch (_error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         // Silent error handling
       }
     }
