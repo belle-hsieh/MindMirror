@@ -279,7 +279,7 @@ As I future project, I plan to enhance the mood tracking feature with **automati
 ## 🚢 Deployment
 
 The app is currently deployed on **[Vercel](https://vercel.com/)** and live at:
-👉 **[https://mind-mirror-eight.vercel.app/](https://mind-mirror-eight.vercel.app/)**
+👉 **[https://mind-mirror-eight.vercel.app/](https://mind-mirror-bhsieh.vercel.app/)**
 
 ### Deploy Your Own
 
